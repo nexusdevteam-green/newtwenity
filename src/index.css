@@ -238,6 +238,11 @@ button { font-family: inherit; cursor: pointer; border: none; }
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 .btn:hover { transform: translateY(-2px); }
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
 .btn--primary {
   background: var(--coral);
   color: var(--ink);
@@ -336,12 +341,116 @@ button { font-family: inherit; cursor: pointer; border: none; }
   z-index: 2;
 }
 
+.main__feed-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .section-title {
   font-family: var(--font-display);
   font-size: 1.4rem;
   color: var(--paper);
   margin: 0 0 18px;
 }
+
+/* ---------- bocadillo para publicar ---------- */
+.composer {
+  position: relative;
+  background: var(--paper);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 22px 24px 18px;
+  margin-bottom: 28px;
+}
+
+.composer::after {
+  content: "";
+  position: absolute;
+  left: 44px;
+  bottom: -14px;
+  width: 0;
+  height: 0;
+  border: 14px solid transparent;
+  border-top-color: var(--paper);
+  border-bottom: 0;
+}
+
+.composer__tape {
+  position: absolute;
+  top: -12px;
+  left: 28px;
+  width: 70px;
+  height: 24px;
+  background: rgba(255, 216, 115, 0.85);
+  transform: rotate(-4deg);
+  box-shadow: 0 2px 3px rgba(0,0,0,0.15);
+}
+
+.composer__bubble {
+  display: flex;
+  gap: 14px;
+}
+
+.composer__avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid var(--paper-dark);
+}
+
+.composer__input {
+  flex: 1;
+  resize: none;
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text);
+  padding-top: 8px;
+}
+.composer__input:focus { outline: none; }
+.composer__input::placeholder { color: var(--text-soft); }
+
+.composer__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px dashed var(--cork-dark);
+  margin-top: 8px;
+  padding-top: 12px;
+  flex-wrap: wrap;
+}
+
+.composer__options {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.composer__option {
+  background: transparent;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--marker);
+  padding: 6px 10px;
+  border-radius: 14px;
+  transition: background 0.15s ease;
+}
+.composer__option:hover { background: rgba(46,111,149,0.1); }
+
+.composer__submit {
+  padding: 9px 20px;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 0 var(--marker-dark);
+}
+.composer__submit:hover { box-shadow: 0 6px 0 var(--marker-dark); }
 
 /* ---------- posts del muro ---------- */
 .post {
