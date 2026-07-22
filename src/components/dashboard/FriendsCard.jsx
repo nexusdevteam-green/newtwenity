@@ -1,10 +1,10 @@
-import friends from '../../data/friends'
+import friends from "../../data/friends"
 
 function FriendsCard() {
   return (
     <div className="board-card">
       <div className="board-card__tape" />
-      <h3 className="board-card__title">Tu pandilla</h3>
+      <h3 className="board-card__title">Tus amigos</h3>
       <p className="board-card__sub">18 conectados ahora</p>
       <ul className="friends-grid">
         {friends.map((friend) => (
