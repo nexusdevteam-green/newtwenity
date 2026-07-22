@@ -1,5 +1,5 @@
 const navLinks = [
-  { href: "#inicio", label: "Muro", active: true },
+  { href: "/", label: "Muro" },
   { href: "#pandilla", label: "Amigos" },
   { href: "#eventos", label: "Eventos" },
   { href: "#fotos", label: "Fotos" },
