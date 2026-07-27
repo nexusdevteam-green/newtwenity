@@ -1,11 +1,19 @@
 function ProfileInfo({ user, isOwnProfile }) {
-  const hasDetails = Boolean(user.birthday || user.studyOrWork || user.pet || user.hobbies)
+  const hasDetails = Boolean(
+    user.birthday || user.study_or_work || user.pet || user.hobbies?.length
+  )
 
   return (
     <div className="board-card profile-info">
       <div className="board-card__tape" />
-      <div className="profile-info__avatar" style={{ backgroundImage: `url('${user.avatar}')` }} />
-      <h2 className="profile-info__name">{user.name}</h2>
+      <div
+        className="profile-info__avatar"
+        style={{ backgroundImage: `url('${user.avatar_url || ""}')` }}
+      />
+      <h2 className="profile-info__name">{user.display_name}</h2>
+      <p className="profile-info__username">@{user.username}</p>
+
+      {user.bio && <p className="profile-info__bio">{user.bio}</p>}
 
       {hasDetails ? (
         <ul className="profile-info__facts">
@@ -14,9 +22,9 @@ function ProfileInfo({ user, isOwnProfile }) {
               🎂 <span>{user.birthday}</span>
             </li>
           )}
-          {user.studyOrWork && (
+          {user.study_or_work && (
             <li>
-              🎓 <span>{user.studyOrWork}</span>
+              🎓 <span>{user.study_or_work}</span>
             </li>
           )}
           {user.pet && (
@@ -38,7 +46,9 @@ function ProfileInfo({ user, isOwnProfile }) {
           )}
         </ul>
       ) : (
-        !isOwnProfile && <p className="profile-info__readonly">Este perfil es de solo lectura.</p>
+        !isOwnProfile && (
+          <p className="profile-info__readonly">Este perfil es de solo lectura.</p>
+        )
       )}
     </div>
   )

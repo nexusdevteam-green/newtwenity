@@ -7,16 +7,18 @@ import useClickOutside from "../hooks/useClickOutside"
 function Header({ hiddenPostsCount = 0, onOpenHiddenPosts }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, logout } = useAuth()
+  const { profile, logout } = useAuth()
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const isOwnProfilePage = location.pathname === `/perfil/${user.id}`
+  const isOwnProfilePage = profile && location.pathname === `/perfil/${profile.id}`
   const settingsRef = useClickOutside(settingsOpen, () => setSettingsOpen(false))
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setSettingsOpen(false)
-    logout()
+    await logout()
     navigate("/login", { replace: true })
   }
+
+  if (!profile) return null
 
   return (
     <header className="navbar">
@@ -34,7 +36,7 @@ function Header({ hiddenPostsCount = 0, onOpenHiddenPosts }) {
 
         <div className="navbar__user">
           <span className="navbar__bell" title="Notificaciones">
-            🔔<span className="badge">3</span>
+            🔔<span className="badge">0</span>
           </span>
 
           {isOwnProfilePage && (
@@ -65,10 +67,10 @@ function Header({ hiddenPostsCount = 0, onOpenHiddenPosts }) {
             </div>
           )}
 
-          <Link to={`/perfil/${user.id}`}>
+          <Link to={`/perfil/${profile.id}`}>
             <div
               className="navbar__avatar"
-              style={{ backgroundImage: `url('${user.avatar}')` }}
+              style={{ backgroundImage: `url('${profile.avatar_url}')` }}
             />
           </Link>
         </div>

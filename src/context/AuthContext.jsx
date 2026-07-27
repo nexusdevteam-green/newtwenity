@@ -1,91 +1,118 @@
-import { createContext, useContext, useState } from "react"
-import currentUser from "../data/currentUser"
+import { createContext, useContext, useEffect, useState } from "react";
+import * as authService from "../services/auth";
+import * as profileService from "../services/profiles";
 
-const AuthContext = createContext(null)
-
-const USERS_KEY = "tuenties_users"
-const SESSION_KEY = "tuenties_session"
-const DEMO_PASSWORD = "tuenti2026"
-
-// Sin backend: los "usuarios" viven en localStorage. La cuenta demo reutiliza
-// los datos de currentUser para que los posts/amigos de ejemplo sigan encajando.
-function loadInitialState() {
-  let users
-  try {
-    const stored = JSON.parse(localStorage.getItem(USERS_KEY))
-    users = Array.isArray(stored) && stored.length > 0 ? stored : null
-  } catch {
-    users = null
-  }
-
-  if (!users) {
-    users = [{ ...currentUser, email: "jaime@tuenties.com", password: DEMO_PASSWORD }]
-    localStorage.setItem(USERS_KEY, JSON.stringify(users))
-  }
-
-  const sessionEmail = localStorage.getItem(SESSION_KEY)
-  const user =
-    users.find((item) => item.email.toLowerCase() === sessionEmail?.toLowerCase()) || null
-
-  return { users, user }
-}
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [state, setState] = useState(loadInitialState)
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const register = ({ name, email, password }) => {
-    const cleanEmail = email.trim().toLowerCase()
+  // Cargar sesión inicial y suscribirse a cambios
+  useEffect(() => {
+    let mounted = true;
 
-    if (state.users.some((existing) => existing.email.toLowerCase() === cleanEmail)) {
-      return { ok: false, error: "Ya existe una cuenta con ese email." }
+    async function init() {
+      try {
+        const sessionUser = await authService.getCurrentUser();
+        if (!mounted) return;
+
+        setUser(sessionUser);
+
+        if (sessionUser) {
+          const p = await profileService.getProfile(sessionUser.id);
+          if (mounted) setProfile(p);
+        }
+      } catch (err) {
+        console.error("Error inicializando sesión:", err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
 
-    const newUser = {
-      id: Date.now(),
-      name: name.trim(),
-      email: cleanEmail,
-      password,
-      avatar: `https://i.pravatar.cc/300?u=${cleanEmail}`,
-      birthday: "",
-      studyOrWork: "",
-      pet: "",
-      hobbies: [],
+    init();
+
+    const unsubscribe = authService.onAuthStateChange(async (newUser) => {
+      setUser(newUser);
+      if (newUser) {
+        try {
+          const p = await profileService.getProfile(newUser.id);
+          setProfile(p);
+        } catch (err) {
+          console.error("Error cargando perfil:", err);
+          setProfile(null);
+        }
+      } else {
+        setProfile(null);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, []);
+
+  const register = async ({ name, email, password }) => {
+    try {
+      await authService.signUp({
+        email,
+        password,
+        displayName: name,
+      });
+      return { ok: true };
+    } catch (err) {
+      const message =
+        err.message === "User already registered"
+          ? "Ya existe una cuenta con ese email."
+          : err.message || "Error al crear la cuenta.";
+      return { ok: false, error: message };
     }
+  };
 
-    const nextUsers = [...state.users, newUser]
-    localStorage.setItem(USERS_KEY, JSON.stringify(nextUsers))
-    localStorage.setItem(SESSION_KEY, newUser.email)
-    setState({ users: nextUsers, user: newUser })
-    return { ok: true }
-  }
-
-  const login = ({ email, password }) => {
-    const cleanEmail = email.trim().toLowerCase()
-    const found = state.users.find((existing) => existing.email.toLowerCase() === cleanEmail)
-
-    if (!found || found.password !== password) {
-      return { ok: false, error: "Email o contraseña incorrectos." }
+  const login = async ({ email, password }) => {
+    try {
+      await authService.signIn({ email, password });
+      return { ok: true };
+    } catch (err) {
+      const message =
+        err.message === "Invalid login credentials"
+          ? "Email o contraseña incorrectos."
+          : err.message || "Error al iniciar sesión.";
+      return { ok: false, error: message };
     }
+  };
 
-    localStorage.setItem(SESSION_KEY, found.email)
-    setState((current) => ({ ...current, user: found }))
-    return { ok: true }
-  }
+  const logout = async () => {
+    try {
+      await authService.signOut();
+    } catch (err) {
+      console.error("Error al cerrar sesión:", err);
+    }
+  };
 
-  const logout = () => {
-    localStorage.removeItem(SESSION_KEY)
-    setState((current) => ({ ...current, user: null }))
-  }
+  const refreshProfile = async () => {
+    if (!user) return;
+    try {
+      const p = await profileService.getProfile(user.id);
+      setProfile(p);
+    } catch (err) {
+      console.error("Error refrescando perfil:", err);
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user: state.user, register, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, profile, loading, register, login, logout, refreshProfile }}
+    >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) throw new Error("useAuth debe usarse dentro de un AuthProvider")
-  return context
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth debe usarse dentro de un AuthProvider");
+  return context;
 }

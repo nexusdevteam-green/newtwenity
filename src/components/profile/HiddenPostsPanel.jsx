@@ -1,5 +1,3 @@
-import Button from "../Button"
-
 function HiddenPostsPanel({ posts, onUnhide, onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -19,15 +17,16 @@ function HiddenPostsPanel({ posts, onUnhide, onClose }) {
               <li key={post.id} className="hidden-post">
                 <div
                   className="hidden-post__avatar"
-                  style={{ backgroundImage: `url('${post.avatar}')` }}
+                  style={{
+                    backgroundImage: `url('${post.profiles?.avatar_url || ""}')`,
+                  }}
                 />
                 <div className="hidden-post__info">
-                  <p className="hidden-post__name">{post.name}</p>
-                  <p className="hidden-post__text">{post.text}</p>
+                  <p className="hidden-post__name">
+                    {post.profiles?.display_name || "Anónimo"}
+                  </p>
+                  <p className="hidden-post__text">{post.content}</p>
                 </div>
-                <Button baseClass="post__manage-btn" onClick={() => onUnhide(post.id)}>
-                  Desocultar
-                </Button>
               </li>
             ))}
           </ul>

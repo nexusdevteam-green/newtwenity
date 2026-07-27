@@ -13,12 +13,13 @@ function LoginForm() {
   const [form, setForm] = useState({ email: "", password: "" })
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
   const handleChange = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }))
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     setFormError("")
 
@@ -26,7 +27,10 @@ function LoginForm() {
     setErrors(validationErrors)
     if (Object.keys(validationErrors).length > 0) return
 
-    const result = login(form)
+    setSubmitting(true)
+    const result = await login(form)
+    setSubmitting(false)
+
     if (!result.ok) {
       setFormError(result.error)
       return
@@ -68,8 +72,8 @@ function LoginForm() {
 
         {formError && <p className="auth-error auth-error--form">{formError}</p>}
 
-        <Button type="submit" variant="primary" className="auth-submit">
-          Entrar
+        <Button type="submit" variant="primary" className="auth-submit" disabled={submitting}>
+          {submitting ? "Entrando..." : "Entrar"}
         </Button>
 
         <p className="auth-switch">

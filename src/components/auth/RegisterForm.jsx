@@ -11,12 +11,13 @@ function RegisterForm() {
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" })
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
   const handleChange = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }))
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     setFormError("")
 
@@ -24,7 +25,10 @@ function RegisterForm() {
     setErrors(validationErrors)
     if (Object.keys(validationErrors).length > 0) return
 
-    const result = register(form)
+    setSubmitting(true)
+    const result = await register(form)
+    setSubmitting(false)
+
     if (!result.ok) {
       setFormError(result.error)
       return
@@ -92,8 +96,8 @@ function RegisterForm() {
 
         {formError && <p className="auth-error auth-error--form">{formError}</p>}
 
-        <Button type="submit" variant="primary" className="auth-submit">
-          Crear cuenta
+        <Button type="submit" variant="primary" className="auth-submit" disabled={submitting}>
+          {submitting ? "Creando cuenta..." : "Crear cuenta"}
         </Button>
 
         <p className="auth-switch">
