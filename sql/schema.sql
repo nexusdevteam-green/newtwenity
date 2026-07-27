@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS posts (
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   content TEXT NOT NULL DEFAULT '',
   image_url TEXT,
+  is_hidden BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );

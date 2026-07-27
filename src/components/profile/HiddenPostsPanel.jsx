@@ -1,3 +1,5 @@
+import Button from "../Button"
+
 function HiddenPostsPanel({ posts, onUnhide, onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -27,6 +29,12 @@ function HiddenPostsPanel({ posts, onUnhide, onClose }) {
                   </p>
                   <p className="hidden-post__text">{post.content}</p>
                 </div>
+                <Button
+                  baseClass="post__manage-btn"
+                  onClick={() => onUnhide?.(post)}
+                >
+                  Mostrar
+                </Button>
               </li>
             ))}
           </ul>

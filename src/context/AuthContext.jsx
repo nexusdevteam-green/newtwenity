@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
         setUser(sessionUser);
 
         if (sessionUser) {
-          const p = await profileService.getProfile(sessionUser.id);
+          const p = await profileService.ensureProfile(sessionUser);
           if (mounted) setProfile(p);
         }
       } catch (err) {
@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
       setUser(newUser);
       if (newUser) {
         try {
-          const p = await profileService.getProfile(newUser.id);
+          const p = await profileService.ensureProfile(newUser);
           setProfile(p);
         } catch (err) {
           console.error("Error cargando perfil:", err);

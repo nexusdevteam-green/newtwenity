@@ -1,6 +1,6 @@
 import Post from "../dashboard/Post"
 
-function ProfileFeed({ posts, isOwnProfile, onDelete }) {
+function ProfileFeed({ posts, isOwnProfile, onDelete, onHide }) {
   return (
     <section className="feed profile-feed">
       <h2 className="section-title">Publicaciones</h2>
@@ -15,6 +15,7 @@ function ProfileFeed({ posts, isOwnProfile, onDelete }) {
           post={post}
           isOwner={isOwnProfile}
           onDelete={onDelete}
+          onHide={onHide}
         />
       ))}
     </section>

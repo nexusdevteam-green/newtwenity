@@ -43,8 +43,8 @@ function LoginForm() {
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit} noValidate>
         <div className="auth-card__tape" />
-        <h1 className="auth-card__title">Hola de nuevo</h1>
-        <p className="auth-card__sub">Entra con tu cuenta para ver el muro.</p>
+        <h1 className="auth-card__title">Sigue compartiendo</h1>
+        <p className="auth-card__sub">¡No te pierdas lo que van a hacer tus amigos!</p>
 
         <label className="auth-field">
           <span>Email</span>

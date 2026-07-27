@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import Button from "../Button"
 import { useAuth } from "../../context/AuthContext"
 
-function Post({ post, isOwner = false, onDelete }) {
+function Post({ post, isOwner = false, onDelete, onHide }) {
   const {
     id,
     profiles,
@@ -59,6 +59,12 @@ function Post({ post, isOwner = false, onDelete }) {
         </div>
         {isOwner && (
           <div className="post__manage">
+            <Button
+              baseClass="post__manage-btn"
+              onClick={() => onHide?.(id)}
+            >
+              Ocultar
+            </Button>
             <Button
               baseClass="post__manage-btn"
               onClick={() => onDelete?.(id)}
