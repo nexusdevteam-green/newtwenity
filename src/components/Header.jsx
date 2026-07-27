@@ -1,14 +1,22 @@
 import { useState } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import Nav from "./Nav"
-import currentUser from "../data/currentUser"
+import { useAuth } from "../context/AuthContext"
 import useClickOutside from "../hooks/useClickOutside"
 
 function Header({ hiddenPostsCount = 0, onOpenHiddenPosts }) {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { user, logout } = useAuth()
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const isOwnProfilePage = location.pathname === `/perfil/${currentUser.id}`
+  const isOwnProfilePage = location.pathname === `/perfil/${user.id}`
   const settingsRef = useClickOutside(settingsOpen, () => setSettingsOpen(false))
+
+  const handleLogout = () => {
+    setSettingsOpen(false)
+    logout()
+    navigate("/login", { replace: true })
+  }
 
   return (
     <header className="navbar">
@@ -51,16 +59,16 @@ function Header({ hiddenPostsCount = 0, onOpenHiddenPosts }) {
                   >
                     Posts ocultos{hiddenPostsCount > 0 ? ` ( ${hiddenPostsCount} )` : ""}
                   </li>
-                  <li>Cerrar sesión</li>
+                  <li onClick={handleLogout}>Cerrar sesión</li>
                 </ul>
               )}
             </div>
           )}
 
-          <Link to={`/perfil/${currentUser.id}`}>
+          <Link to={`/perfil/${user.id}`}>
             <div
               className="navbar__avatar"
-              style={{ backgroundImage: `url('${currentUser.avatar}')` }}
+              style={{ backgroundImage: `url('${user.avatar}')` }}
             />
           </Link>
         </div>

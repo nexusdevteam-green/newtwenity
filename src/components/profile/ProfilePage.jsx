@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import Header from '../Header'
-import currentUser from '../../data/currentUser'
+import { useAuth } from '../../context/AuthContext'
 import friends from '../../data/friends'
 import { usePosts } from '../../context/PostsContext'
 import ProfileInfo from './ProfileInfo'
@@ -11,9 +11,10 @@ import HiddenPostsPanel from './HiddenPostsPanel'
 
 function ProfilePage() {
   const { id } = useParams()
-  const isOwnProfile = id === String(currentUser.id)
+  const { user } = useAuth()
+  const isOwnProfile = id === String(user.id)
   const friend = friends.find((item) => String(item.id) === id)
-  const profileUser = isOwnProfile ? currentUser : friend
+  const profileUser = isOwnProfile ? user : friend
 
   const { posts, hiddenPosts, deletePost, hidePost, unhidePost } = usePosts()
   const [hiddenPanelOpen, setHiddenPanelOpen] = useState(false)

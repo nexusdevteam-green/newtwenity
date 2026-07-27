@@ -2,7 +2,11 @@ import { Routes, Route, useParams } from 'react-router-dom'
 import Dashboard from './components/dashboard/Dashboard'
 import ProfilePage from './components/profile/ProfilePage'
 import Footer from './components/Footer'
+import LoginForm from './components/auth/LoginForm'
+import RegisterForm from './components/auth/RegisterForm'
+import RequireAuth from './components/auth/RequireAuth'
 import { PostsProvider } from './context/PostsContext'
+import { AuthProvider } from './context/AuthContext'
 
 function ProfileRoute() {
   const { id } = useParams()
@@ -12,17 +16,35 @@ function ProfileRoute() {
 
 function App() {
   return (
-    <PostsProvider>
-      <div className="app-shell">
-        <div className="app-content">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/perfil/:id" element={<ProfileRoute />} />
-          </Routes>
+    <AuthProvider>
+      <PostsProvider>
+        <div className="app-shell">
+          <div className="app-content">
+            <Routes>
+              <Route path="/login" element={<LoginForm />} />
+              <Route path="/registro" element={<RegisterForm />} />
+              <Route
+                path="/"
+                element={
+                  <RequireAuth>
+                    <Dashboard />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/perfil/:id"
+                element={
+                  <RequireAuth>
+                    <ProfileRoute />
+                  </RequireAuth>
+                }
+              />
+            </Routes>
+          </div>
+          <Footer />
         </div>
-        <Footer />
-      </div>
-    </PostsProvider>
+      </PostsProvider>
+    </AuthProvider>
   )
 }
 

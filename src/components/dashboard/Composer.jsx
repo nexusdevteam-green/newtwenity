@@ -1,11 +1,12 @@
 import { useState } from "react"
 import Button from "../Button"
-import currentUser from "../../data/currentUser"
+import { useAuth } from "../../context/AuthContext"
 import { usePosts } from "../../context/PostsContext"
 
 function Composer() {
   const [text, setText] = useState("")
   const [photo] = useState(null) // subida de fotos: pendiente hasta tener API/almacenamiento
+  const { user } = useAuth()
   const { addPost } = usePosts()
 
   const canPublish = Boolean(text.trim() || photo)
@@ -15,9 +16,9 @@ function Composer() {
 
     addPost({
       id: Date.now(),
-      authorId: currentUser.id,
-      avatar: currentUser.avatar,
-      name: currentUser.name,
+      authorId: user.id,
+      avatar: user.avatar,
+      name: user.name,
       time: "Justo ahora",
       text: text.trim(),
       photo,
@@ -38,7 +39,7 @@ function Composer() {
       <div className="composer__bubble">
         <div
           className="composer__avatar"
-          style={{ backgroundImage: `url('${currentUser.avatar}')` }}
+          style={{ backgroundImage: `url('${user.avatar}')` }}
         />
         <textarea
           className="composer__input"
