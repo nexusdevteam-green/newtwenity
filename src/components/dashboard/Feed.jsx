@@ -28,7 +28,7 @@ function Feed() {
         <Post key={post.id} post={post} />
       ))}
 
-      {hasMore && !loading && (
+      {hasMore && !loading && posts.length > 0 && (
         <button
           type="button"
           className="feed__load-more"

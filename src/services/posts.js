@@ -49,6 +49,7 @@ export async function getFeed({ page = 0, pageSize = 20 } = {}) {
       comments (id, user_id, content, created_at, profiles:user_id (id, username, display_name, avatar_url))
     `
     )
+    .eq("is_hidden", false)
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -84,6 +85,7 @@ export async function getUserPosts(userId, { page = 0, pageSize = 20 } = {}) {
     `
     )
     .eq("user_id", userId)
+    .eq("is_hidden", false)
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -103,6 +105,37 @@ export async function getUserPosts(userId, { page = 0, pageSize = 20 } = {}) {
 export async function deletePost(postId) {
   const { error } = await supabase.from("posts").delete().eq("id", postId);
   if (error) throw error;
+}
+
+/**
+ * Oculta o muestra de nuevo un post propio (no lo borra).
+ */
+export async function setPostHidden(postId, isHidden) {
+  const { error } = await supabase
+    .from("posts")
+    .update({ is_hidden: isHidden })
+    .eq("id", postId);
+  if (error) throw error;
+}
+
+/**
+ * Obtiene los posts ocultos de un usuario (solo visibles para su propio autor).
+ */
+export async function getHiddenPosts(userId) {
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      `
+      *,
+      profiles:user_id (id, username, display_name, avatar_url)
+    `
+    )
+    .eq("user_id", userId)
+    .eq("is_hidden", true)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data;
 }
 
 /**

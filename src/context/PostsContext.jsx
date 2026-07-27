@@ -143,6 +143,19 @@ export function PostsProvider({ children }) {
     setPosts((current) => current.filter((p) => p.id !== postId));
   }, []);
 
+  const hidePost = useCallback(async (postId) => {
+    await postsService.setPostHidden(postId, true);
+    setPosts((current) => current.filter((p) => p.id !== postId));
+  }, []);
+
+  const unhidePost = useCallback(async (post) => {
+    await postsService.setPostHidden(post.id, false);
+    setPosts((current) => {
+      if (current.some((p) => p.id === post.id)) return current;
+      return [{ ...post, is_hidden: false }, ...current];
+    });
+  }, []);
+
   const toggleLike = useCallback(
     async (postId) => {
       const liked = await postsService.toggleLike(postId);
@@ -192,6 +205,8 @@ export function PostsProvider({ children }) {
         hasMore,
         addPost,
         deletePost,
+        hidePost,
+        unhidePost,
         toggleLike,
         addComment,
         loadMore,

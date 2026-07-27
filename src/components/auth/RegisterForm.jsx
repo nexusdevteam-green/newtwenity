@@ -1,17 +1,19 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import Button from "../Button"
 import { useAuth } from "../../context/AuthContext"
 import { validateRegisterForm } from "../../utils/validators"
 
 function RegisterForm() {
   const { register } = useAuth()
-  const navigate = useNavigate()
 
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" })
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState("")
   const [submitting, setSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState(null)
 
   const handleChange = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }))
@@ -34,7 +36,29 @@ function RegisterForm() {
       return
     }
 
-    navigate("/", { replace: true })
+    setRegisteredEmail(form.email)
+  }
+
+  if (registeredEmail) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card">
+          <div className="auth-card__tape" />
+          <div className="auth-banner">
+            <span className="auth-banner__icon">📬</span>
+            <h1 className="auth-card__title">¡Revisa tu correo!</h1>
+            <p className="auth-card__sub">
+              Te hemos enviado un email de confirmación a <strong>{registeredEmail}</strong>.
+              Ábrelo y haz clic en el enlace para activar tu cuenta antes de iniciar sesión.
+            </p>
+          </div>
+
+          <p className="auth-switch">
+            <Link to="/login">Ir a iniciar sesión</Link>
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -70,25 +94,47 @@ function RegisterForm() {
 
         <label className="auth-field">
           <span>Contraseña</span>
-          <input
-            type="password"
-            value={form.password}
-            onChange={handleChange("password")}
-            placeholder="Mínimo 6 caracteres"
-            autoComplete="new-password"
-          />
+          <div className="auth-field__input-wrap">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              onChange={handleChange("password")}
+              placeholder="Mínimo 6 caracteres"
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              className="auth-field__toggle"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              tabIndex={-1}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </button>
+          </div>
           {errors.password && <small className="auth-error">{errors.password}</small>}
         </label>
 
         <label className="auth-field">
           <span>Repite la contraseña</span>
-          <input
-            type="password"
-            value={form.confirmPassword}
-            onChange={handleChange("confirmPassword")}
-            placeholder="••••••••"
-            autoComplete="new-password"
-          />
+          <div className="auth-field__input-wrap">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              value={form.confirmPassword}
+              onChange={handleChange("confirmPassword")}
+              placeholder="••••••••"
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              className="auth-field__toggle"
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              tabIndex={-1}
+            >
+              {showConfirmPassword ? "🙈" : "👁️"}
+            </button>
+          </div>
           {errors.confirmPassword && (
             <small className="auth-error">{errors.confirmPassword}</small>
           )}

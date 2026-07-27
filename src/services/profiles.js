@@ -15,6 +15,42 @@ export async function getProfile(userId) {
 }
 
 /**
+ * Obtiene el perfil del usuario autenticado y, si no existe (por ejemplo
+ * porque el trigger handle_new_user no llegó a crearlo), lo crea como
+ * respaldo usando la política RLS "profiles_insert_own".
+ */
+export async function ensureProfile(user) {
+  try {
+    return await getProfile(user.id);
+  } catch (err) {
+    if (err.code !== "PGRST116") throw err;
+  }
+
+  const rawName =
+    user.user_metadata?.display_name ||
+    user.user_metadata?.name ||
+    user.email?.split("@")[0] ||
+    "usuario";
+  const cleanUsername =
+    rawName.toLowerCase().replace(/[^a-z0-9]/g, "") || user.id.slice(0, 8);
+  const username = `${cleanUsername}${user.id.slice(0, 4)}`;
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .insert({
+      id: user.id,
+      username,
+      display_name: rawName,
+      avatar_url: `https://i.pravatar.cc/300?u=${user.email}`,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
  * Obtiene el perfil del usuario actual.
  */
 export async function getMyProfile() {

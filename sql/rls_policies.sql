@@ -35,10 +35,10 @@ CREATE POLICY "profiles_insert_own"
 -- POLÍTICAS: posts
 -- ============================================================
 
--- Cualquiera puede leer todos los posts (feed público)
+-- Cualquiera puede leer los posts públicos; un post oculto solo lo ve su autor
 CREATE POLICY "posts_select_public"
   ON posts FOR SELECT
-  USING (true);
+  USING (NOT is_hidden OR auth.uid() = user_id);
 
 -- Un usuario autenticado puede insertar sus propios posts
 CREATE POLICY "posts_insert_own"
