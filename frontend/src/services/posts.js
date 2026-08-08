@@ -33,6 +33,23 @@ export async function deletePost(postId) {
 }
 
 /**
+ * Oculta o muestra de nuevo un post propio (no lo borra).
+ */
+export async function setPostHidden(postId, isHidden) {
+  await apiFetch(`/posts/${postId}/hidden`, {
+    method: "PATCH",
+    body: { isHidden },
+  });
+}
+
+/**
+ * Obtiene los posts ocultos del usuario autenticado.
+ */
+export async function getHiddenPosts() {
+  return apiFetch("/posts/hidden");
+}
+
+/**
  * Da o quita "me gusta" a un post. Retorna true si ha quedado con like.
  */
 export async function toggleLike(postId) {

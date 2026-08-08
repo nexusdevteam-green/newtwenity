@@ -15,6 +15,15 @@ export async function getMyProfile() {
 }
 
 /**
+ * Obtiene el perfil del usuario autenticado y, si no existe (por ejemplo
+ * porque el trigger handle_new_user no llegó a crearlo), el backend lo
+ * crea como respaldo.
+ */
+export async function ensureProfile() {
+  return apiFetch("/profiles/me");
+}
+
+/**
  * Actualiza el perfil del usuario actual.
  */
 export async function updateProfile(updates) {
