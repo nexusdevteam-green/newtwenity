@@ -2,13 +2,36 @@ import { getStoredSession, setStoredSession, clearStoredSession } from "./sessio
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
-class ApiError extends Error {}
+class ApiError extends Error {
+  constructor(message, { status, isNetworkError = false } = {}) {
+    super(message);
+    this.status = status;
+    this.isNetworkError = isNetworkError;
+  }
+}
+
+/**
+ * fetch() lanza un TypeError genérico ("Failed to fetch") cuando el servidor
+ * no responde (apagado, sin red, CORS...). Lo convertimos en un mensaje claro.
+ */
+async function safeFetch(url, options) {
+  try {
+    return await fetch(url, options);
+  } catch {
+    throw new ApiError(
+      "No se ha podido conectar con el servidor. Comprueba tu conexión a internet o inténtalo de nuevo en unos minutos.",
+      { isNetworkError: true }
+    );
+  }
+}
 
 async function parseResponse(response) {
   if (response.status === 204) return null;
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new ApiError(data.error || "Error de red");
+    throw new ApiError(data.error || `Error del servidor (${response.status}).`, {
+      status: response.status,
+    });
   }
   return data;
 }
@@ -17,13 +40,13 @@ async function tryRefresh() {
   const session = getStoredSession();
   if (!session?.refresh_token) return null;
 
-  const response = await fetch(`${API_URL}/auth/refresh`, {
+  const response = await safeFetch(`${API_URL}/auth/refresh`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refresh_token: session.refresh_token }),
-  });
+  }).catch(() => null);
 
-  if (!response.ok) return null;
+  if (!response || !response.ok) return null;
   const data = await response.json();
   const refreshed = { ...data.session, user: data.user };
   setStoredSession(refreshed);
@@ -39,7 +62,7 @@ export async function apiFetch(path, { method = "GET", body, auth = true, isRetr
   const headers = { "Content-Type": "application/json" };
   if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await safeFetch(`${API_URL}${path}`, {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -67,7 +90,7 @@ export async function apiUpload(path, file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await safeFetch(`${API_URL}${path}`, {
     method: "POST",
     headers,
     body: formData,

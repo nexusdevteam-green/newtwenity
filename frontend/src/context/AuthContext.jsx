@@ -4,6 +4,14 @@ import * as profileService from "../services/profiles";
 
 const AuthContext = createContext(null);
 
+// Traduce los mensajes de error de Supabase Auth a mensajes claros para el usuario.
+const LOGIN_ERROR_MESSAGES = {
+  "Invalid login credentials": "Email o contraseña incorrectos.",
+  "Email not confirmed": "Debes confirmar tu email antes de iniciar sesión. Revisa tu bandeja de entrada.",
+  "Email y contraseña son obligatorios.": "Email y contraseña son obligatorios.",
+  "Too many requests": "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.",
+};
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -63,10 +71,11 @@ export function AuthProvider({ children }) {
       });
       return { ok: true };
     } catch (err) {
-      const message =
-        err.message === "User already registered"
-          ? "Ya existe una cuenta con ese email."
-          : err.message || "Error al crear la cuenta.";
+      const message = err.isNetworkError
+        ? err.message
+        : err.message === "User already registered"
+        ? "Ya existe una cuenta con ese email."
+        : err.message || "Error al crear la cuenta. Inténtalo de nuevo.";
       return { ok: false, error: message };
     }
   };
@@ -76,10 +85,12 @@ export function AuthProvider({ children }) {
       await authService.signIn({ email, password });
       return { ok: true };
     } catch (err) {
+      if (err.isNetworkError) {
+        return { ok: false, error: err.message, invalidCredentials: false };
+      }
+
       const invalidCredentials = err.message === "Invalid login credentials";
-      const message = invalidCredentials
-        ? "Email o contraseña incorrectos"
-        : err.message || "Error al iniciar sesión.";
+      const message = LOGIN_ERROR_MESSAGES[err.message] || err.message || "Error al iniciar sesión. Inténtalo de nuevo.";
       return { ok: false, error: message, invalidCredentials };
     }
   };
