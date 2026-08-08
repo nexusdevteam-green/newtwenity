@@ -35,11 +35,29 @@ router.get("/", async (req, res) => {
   const { data, error } = await client
     .from("posts")
     .select(POST_SELECT)
+    .eq("is_hidden", false)
     .order("created_at", { ascending: false })
     .range(from, to);
 
   if (error) return res.status(400).json({ error: error.message });
   res.json(enrichPosts(data, req.user?.id));
+});
+
+router.get("/hidden", requireAuth, async (req, res) => {
+  const { data, error } = await req.supabase
+    .from("posts")
+    .select(
+      `
+      *,
+      profiles:user_id (id, username, display_name, avatar_url)
+    `
+    )
+    .eq("user_id", req.user.id)
+    .eq("is_hidden", true)
+    .order("created_at", { ascending: false });
+
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
 });
 
 router.get("/user/:userId", async (req, res) => {
@@ -52,11 +70,26 @@ router.get("/user/:userId", async (req, res) => {
     .from("posts")
     .select(POST_SELECT)
     .eq("user_id", req.params.userId)
+    .eq("is_hidden", false)
     .order("created_at", { ascending: false })
     .range(from, to);
 
   if (error) return res.status(400).json({ error: error.message });
   res.json(enrichPosts(data, req.user?.id));
+});
+
+router.patch("/:id/hidden", requireAuth, async (req, res) => {
+  const { isHidden } = req.body || {};
+
+  const { data, error } = await req.supabase
+    .from("posts")
+    .update({ is_hidden: Boolean(isHidden) })
+    .eq("id", req.params.id)
+    .select()
+    .single();
+
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
 });
 
 router.post("/", requireAuth, async (req, res) => {
