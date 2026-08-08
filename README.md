@@ -1,5 +1,31 @@
 # newtwenity
 A modern social networking platform that connects users through profiles, posts, messaging, and communities.
+
+## Estructura del proyecto
+
+El repositorio está dividido en dos carpetas independientes:
+
+* **`backend/`**: API REST en Node/Express. Es la única parte que habla con Supabase (Auth, Postgres y Storage), usando la clave anónima del proyecto. El SQL del esquema y las políticas RLS vive en `backend/sql/`.
+* **`frontend/`**: aplicación Vite/React. Solo consume la API del backend (no importa `@supabase/supabase-js`).
+
+### Puesta en marcha en local
+
+En dos terminales:
+
+```bash
+cd backend
+npm install
+cp .env.example .env   # rellena SUPABASE_URL y SUPABASE_ANON_KEY
+npm run dev             # http://localhost:4000
+```
+
+```bash
+cd frontend
+npm install
+cp .env.example .env   # VITE_API_URL apuntando al backend
+npm run dev             # http://localhost:5173
+```
+
 # Creación de ramas de trabajo
 
 Imagina que estás desarrollando una aplicación inspirada en la red social **Tuenti**.
