@@ -5,7 +5,23 @@ import routes from "./routes/index.js";
 
 const app = express();
 
-app.use(cors({ origin: process.env.FRONTEND_URL }));
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || process.env.FRONTEND_URL || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Sin origin = curl, health checks, apps móviles... no lo bloqueamos.
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Origen no permitido por CORS"));
+      }
+    },
+  })
+);
 app.use(express.json());
 app.use(attachUser);
 
