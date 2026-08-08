@@ -41,3 +41,29 @@ export function validateLoginForm({ email, password }) {
 
   return errors
 }
+
+export function validateForgotPasswordForm({ email }) {
+  const errors = {}
+
+  if (!email.trim()) {
+    errors.email = "El email es obligatorio."
+  } else if (!isValidEmail(email)) {
+    errors.email = "Escribe un email válido."
+  }
+
+  return errors
+}
+
+export function validateResetPasswordForm({ password, confirmPassword }) {
+  const errors = {}
+
+  if (password.length < 6) {
+    errors.password = "La contraseña debe tener al menos 6 caracteres."
+  }
+
+  if (confirmPassword !== password) {
+    errors.confirmPassword = "Las contraseñas no coinciden."
+  }
+
+  return errors
+}

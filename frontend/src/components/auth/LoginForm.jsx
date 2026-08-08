@@ -13,15 +13,19 @@ function LoginForm() {
   const [form, setForm] = useState({ email: "", password: "" })
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState("")
+  const [credentialsError, setCredentialsError] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   const handleChange = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }))
+    setFormError("")
+    setCredentialsError(false)
   }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     setFormError("")
+    setCredentialsError(false)
 
     const validationErrors = validateLoginForm(form)
     setErrors(validationErrors)
@@ -33,6 +37,7 @@ function LoginForm() {
 
     if (!result.ok) {
       setFormError(result.error)
+      setCredentialsError(Boolean(result.invalidCredentials))
       return
     }
 
@@ -46,10 +51,13 @@ function LoginForm() {
         <h1 className="auth-card__title">Hola de nuevo</h1>
         <p className="auth-card__sub">Entra con tu cuenta para ver el muro.</p>
 
+        {location.state?.message && <p className="auth-success">{location.state.message}</p>}
+
         <label className="auth-field">
           <span>Email</span>
           <input
             type="email"
+            className={credentialsError ? "auth-field__input--invalid" : ""}
             value={form.email}
             onChange={handleChange("email")}
             placeholder="tucorreo@ejemplo.com"
@@ -62,6 +70,7 @@ function LoginForm() {
           <span>Contraseña</span>
           <input
             type="password"
+            className={credentialsError ? "auth-field__input--invalid" : ""}
             value={form.password}
             onChange={handleChange("password")}
             placeholder="••••••••"
@@ -71,6 +80,14 @@ function LoginForm() {
         </label>
 
         {formError && <p className="auth-error auth-error--form">{formError}</p>}
+
+        {credentialsError && (
+          <p className="auth-forgot">
+            <Link to="/recuperar" state={{ email: form.email }}>
+              ¿Has olvidado tu contraseña?
+            </Link>
+          </p>
+        )}
 
         <Button type="submit" variant="primary" className="auth-submit" disabled={submitting}>
           {submitting ? "Entrando..." : "Entrar"}
