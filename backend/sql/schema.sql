@@ -91,6 +91,7 @@ CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   raw_name TEXT;
@@ -112,13 +113,13 @@ BEGIN
 
   -- Asegurar que el username sea único
   final_username := clean_username;
-  WHILE EXISTS (SELECT 1 FROM profiles WHERE username = final_username) LOOP
+  WHILE EXISTS (SELECT 1 FROM public.profiles WHERE username = final_username) LOOP
     counter := counter + 1;
     final_username := clean_username || counter::TEXT;
   END LOOP;
 
   -- Insertar el perfil
-  INSERT INTO profiles (id, username, display_name, avatar_url)
+  INSERT INTO public.profiles (id, username, display_name, avatar_url)
   VALUES (
     NEW.id,
     final_username,

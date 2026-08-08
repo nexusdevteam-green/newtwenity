@@ -40,88 +40,31 @@ export function PostsProvider({ children }) {
     }
   }, [user, fetchPosts]);
 
-  // Suscripción a cambios en tiempo real
+  // Sondeo periódico para reflejar cambios de otros usuarios (sin websockets):
+  // trae la primera página y fusiona posts nuevos + contadores actualizados.
   useEffect(() => {
     if (!user) return;
 
-    const unsubscribePosts = postsService.subscribeToPosts(async (event) => {
-      if (event.type === "INSERT") {
-        // Recargar el post completo con perfil y contadores
-        const data = await postsService.getFeed({ page: 0, pageSize: 1 });
-        const newPost = data.find((p) => p.id === event.post.id);
-        if (newPost) {
-          setPosts((current) => {
-            if (current.some((p) => p.id === newPost.id)) return current;
-            return [newPost, ...current];
+    const interval = setInterval(async () => {
+      try {
+        const latest = await postsService.getFeed({ page: 0, pageSize: 20 });
+        const latestById = new Map(latest.map((post) => [post.id, post]));
+
+        setPosts((current) => {
+          const currentIds = new Set(current.map((post) => post.id));
+          const newOnes = latest.filter((post) => !currentIds.has(post.id));
+          const updatedCurrent = current.map((post) => {
+            const fresh = latestById.get(post.id);
+            return fresh ? { ...post, ...fresh } : post;
           });
-        }
+          return [...newOnes, ...updatedCurrent];
+        });
+      } catch (err) {
+        console.error("Error actualizando el feed:", err);
       }
-      if (event.type === "DELETE") {
-        setPosts((current) => current.filter((p) => p.id !== event.post.id));
-      }
-    });
+    }, 20000);
 
-    const unsubscribeLikes = postsService.subscribeToLikes((payload) => {
-      const postId = payload.new?.post_id || payload.old?.post_id;
-      setPosts((current) =>
-        current.map((post) => {
-          if (post.id !== postId) return post;
-
-          if (payload.eventType === "INSERT") {
-            const isOwn = payload.new?.user_id === user.id;
-            return {
-              ...post,
-              likes_count: post.likes_count + 1,
-              user_liked: isOwn ? true : post.user_liked,
-            };
-          }
-          if (payload.eventType === "DELETE") {
-            const isOwn = payload.old?.user_id === user.id;
-            return {
-              ...post,
-              likes_count: Math.max(0, post.likes_count - 1),
-              user_liked: isOwn ? false : post.user_liked,
-            };
-          }
-          return post;
-        })
-      );
-    });
-
-    const unsubscribeComments = postsService.subscribeToComments((event) => {
-      if (event.type === "INSERT") {
-        setPosts((current) =>
-          current.map((post) => {
-            if (post.id !== event.comment.post_id) return post;
-            return {
-              ...post,
-              comments_count: post.comments_count + 1,
-              comments: [...(post.comments || []), event.comment],
-            };
-          })
-        );
-      }
-      if (event.type === "DELETE") {
-        setPosts((current) =>
-          current.map((post) => {
-            if (post.id !== event.comment.post_id) return post;
-            return {
-              ...post,
-              comments_count: Math.max(0, post.comments_count - 1),
-              comments: (post.comments || []).filter(
-                (c) => c.id !== event.comment.id
-              ),
-            };
-          })
-        );
-      }
-    });
-
-    return () => {
-      unsubscribePosts();
-      unsubscribeLikes();
-      unsubscribeComments();
-    };
+    return () => clearInterval(interval);
   }, [user]);
 
   const addPost = useCallback(async ({ content, imageUrl }) => {

@@ -4,6 +4,8 @@ import ProfilePage from './components/profile/ProfilePage'
 import Footer from './components/Footer'
 import LoginForm from './components/auth/LoginForm'
 import RegisterForm from './components/auth/RegisterForm'
+import ForgotPasswordForm from './components/auth/ForgotPasswordForm'
+import ResetPasswordForm from './components/auth/ResetPasswordForm'
 import RequireAuth from './components/auth/RequireAuth'
 import { PostsProvider } from './context/PostsContext'
 import { AuthProvider } from './context/AuthContext'
@@ -23,6 +25,8 @@ function App() {
             <Routes>
               <Route path="/login" element={<LoginForm />} />
               <Route path="/registro" element={<RegisterForm />} />
+              <Route path="/recuperar" element={<ForgotPasswordForm />} />
+              <Route path="/restablecer-password" element={<ResetPasswordForm />} />
               <Route
                 path="/"
                 element={

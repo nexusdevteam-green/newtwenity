@@ -76,11 +76,11 @@ export function AuthProvider({ children }) {
       await authService.signIn({ email, password });
       return { ok: true };
     } catch (err) {
-      const message =
-        err.message === "Invalid login credentials"
-          ? "Email o contraseña incorrectos."
-          : err.message || "Error al iniciar sesión.";
-      return { ok: false, error: message };
+      const invalidCredentials = err.message === "Invalid login credentials";
+      const message = invalidCredentials
+        ? "Email o contraseña incorrectos"
+        : err.message || "Error al iniciar sesión.";
+      return { ok: false, error: message, invalidCredentials };
     }
   };
 

@@ -1086,6 +1086,12 @@ button { font-family: inherit; cursor: pointer; border: none; }
   outline: 2px solid var(--marker);
   border-color: var(--marker);
 }
+.auth-field input.auth-field__input--invalid {
+  border-color: var(--coral);
+}
+.auth-field input.auth-field__input--invalid:focus {
+  outline-color: var(--coral);
+}
 
 .auth-field__input-wrap {
   position: relative;
@@ -1125,6 +1131,26 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .auth-error--form {
   margin: 4px 0 16px;
   text-align: center;
+}
+
+.auth-forgot {
+  margin: -8px 0 16px;
+  text-align: center;
+  font-size: 0.82rem;
+}
+.auth-forgot a {
+  color: var(--marker-dark);
+  font-weight: 600;
+}
+
+.auth-success {
+  color: var(--text);
+  background: var(--paper-dark);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  text-align: center;
+  margin: 4px 0 16px;
 }
 
 .auth-submit {
